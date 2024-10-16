@@ -1,0 +1,1 @@
+IMPORT INTO loyalty CSV DATA ('s3://adam-london/demo/loyalty/loyalty_test.csv?AWS_ACCESS_KEY_ID=your-aws-access-key&AWS_SECRET_ACCESS_KEY=your-aws-secret-access-key&AWS_REGION=your-buckets-aws-region-name') WITH delimiter = ',',nullif = '';
