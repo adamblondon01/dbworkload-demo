@@ -65,9 +65,66 @@ My region choices were to use us-east-1 (North Virginia), us-east-2 (Ohio) and u
 ## General Setup
 
 1. Create key pairs for each region you are using for your single region and mult-region clusters.  So you want to setup 1 key pair for each of the 3 regions you’ll be using.  I would suggest us-east-1 (North Virginia), us-east-2 (Ohio) and us-west-2 (Oregon)
-2. Create a non-public S3 bucket for yourself where you will put your table data files that you generate with dbworkload.  You’ll later import these data files into your tables using the SQL IMPORT INTO command.  (Note: Fabio’s dbworkload github mentions doing this by using a web server on your application node.  With the latest versions of CRDB (I used version 24.2.2) this no longer will work if you have a large number of data files to import.)
-3. Create a IAM user and policy to allow you to upload, download and access an S3 bucket where you will put your db
+2. Create a non-public S3 bucket where you will put your table data files that you generate with dbworkload.  You’ll later import these data files into your tables using the SQL IMPORT INTO command.  (Note: Fabio’s dbworkload github mentions doing this by using a web server on your application node.  With the latest versions of CRDB (I used version 24.2.2) this no longer will work if you have a large number of data files to import.)  Copy your bucket's URI; select the 'Copy S3 URI' button in the upper right corner of the S3 bucket screen.
+3. Create an IAM policy to allow you to upload, download and access an S3 bucket.  After you press the 'create policy' button select the JSON tab on your upper right.  You'll want to use the JSON below as your template.  Only alter the Resource section.  You can see that I have 6 entries which are for 3 S3 buckets.  Remove my entries and create yours as follows: For each S3 URI create 2 entries; one that ends with a __/*__ and one that doesn't.  Make sure each entry starts with __arn:aws:__  And don't forget a comma at the end of each entry except for the last one.  Then click the 'Next' button in the lower right, enter your policy name, and create your policy.
 
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::adam-london",
+                "arn:aws:s3:::adam-london/*",
+                "arn:aws:s3:::adam-london/demo/loyalty",
+                "arn:aws:s3:::adam-london/demo/loyalty/*",
+                "arn:aws:s3:::adam-london/demo/customer",
+                "arn:aws:s3:::adam-london/demo/customer/*"
+            ]
+        },
+        {
+            "Sid": "VisualEditor1",
+            "Effect": "Allow",
+            "Action": "s3:ListAllMyBuckets",
+            "Resource": "*"
+        }
+    ]
+}
+```
+
+4. Create an IAM user and access key.  Got to the IAM users screen and select the create user button.  When you get to the 'Set Permissions' screen, select the 'attach policies directly' choice and then select the policy you just created.  Then select the 'Next' button and create the user.
+
+Now go back to the list of IAM users and click on your new user which is highlighted in blue.  Select the 'create access key' choice on the right.  On the "Access key best practices & alternatives" screen select the "Other" choice and click next.  On the next screen press the 'Create Access Key'.  Write down in a secure place your AWS access key and your AWS secret access key which you will need later.
 
 ## Single Region Setup
 
+1. Create your Virtual Private Cloud.  Go to the VPC screen and make sure you have selected the AWS region that you want the VPC created in which is also where your database cluster will be located in.  Select the 'create VPC' button in the upper right.  Then do as follows:
+   A. Select the' VPC and more' radio button.
+   B. Under the name tag, clear the default entry of 'Project' and put in the name you want for your VPC and its related objects.  I used 'adam-london'.
+   C. Record your CIDR block for later use.  You can leave the default of 10.0.0.0/16
+   D. Change your 'Number of Availability Zones' to 3 and it will automatically update the number of private and public subnets.
+   E. Take a screen snapshot of the 'Preview screen' on your right.  You'll need the names of your VPC and public and private subnets for later use.
+   F. Create your VPC.
+
+Here is a picture of my VPC preview screen:
+
+
+
+3. Create your internal and external security groups.  Go to the 'Security Groups' screen and make sure you have selected the AWS region that you want these security groups created in, and correspondingly, your database cluster. (Look in the upper right corner for the region dropdown list.)  Then create the external security group.  Make sure you have inbound entries for ports 22, 8080 and 26257 for your home IP address and the Netskope IP addresses.  (See [Netskope IP Addresses](https://cockroachlabs.atlassian.net/wiki/spaces/HELP/pages/3735027747/Netskope+IP+Ranges) )  For your outbound entries, you can enable everything.
+
+
+
+
+
+readme examples:
+
+[test link](https://cockroachlabs.com)
+
+![a sql file](build_2_tables_only.sql)
