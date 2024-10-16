@@ -44,7 +44,7 @@ I have used a two level architecture for this demo with the database cluster at 
 * Application server nodes config: 2 EC2 nodes using m6a.2xlarge instances (8 cpu’s and 32 GB RAM with 100GB SSD)
 	One node will be in the same region as the cluster and the other will be in a much farther away region
 
-My region choices were to create the cluster in us-east-2 (Ohio) and have the application server nodes in us-east-2 and us-west-2 (Oregon)
+__My region choices were to create the cluster in us-east-2 (Ohio) and have the application server nodes in us-east-2 (Ohio) and us-west-2 (Oregon)__
 
 ## Multi-region demo:
 
@@ -65,8 +65,8 @@ My region choices were to use us-east-1 (North Virginia), us-east-2 (Ohio) and u
 ## General Setup
 
 1. Create key pairs for each region you are using for your single region and mult-region clusters.  So you want to setup 1 key pair for each of the 3 regions you’ll be using.  I would suggest us-east-1 (North Virginia), us-east-2 (Ohio) and us-west-2 (Oregon)
-2. Create a non-public S3 bucket where you will put your table data files that you generate with dbworkload.  You’ll later import these data files into your tables using the SQL IMPORT INTO command.  (Note: Fabio’s dbworkload github mentions doing this by using a web server on your application node.  With the latest versions of CRDB (I used version 24.2.2) this no longer will work if you have a large number of data files to import.)  Copy your bucket's URI; select the 'Copy S3 URI' button in the upper right corner of the S3 bucket screen.
-3. Create an IAM policy to allow you to upload, download and access an S3 bucket.  After you press the 'create policy' button select the JSON tab on your upper right.  You'll want to use the JSON below as your template.  Only alter the Resource section.  You can see that I have 6 entries which are for 3 S3 buckets.  Remove my entries and create yours as follows: For each S3 URI create 2 entries; one that ends with a __/*__ and one that doesn't.  Make sure each entry starts with __arn:aws:__  And don't forget a comma at the end of each entry except for the last one.  Then click the 'Next' button in the lower right, enter your policy name, and create your policy.
+2. Create a non-public S3 bucket where you will put your table data files that you generate with dbworkload.  You’ll later import these data files into your tables using the SQL IMPORT INTO command.  I suggest you create the S3 bucket in the same region as the single region database cluster.  Note down which region your choose for later usage.  (Note: Fabio’s dbworkload github mentions doing this by using a web server on your application node.  With the latest versions of CRDB (I used version 24.2.2) this no longer will work if you have a large number of data files to import.)  Copy your bucket's URI; select the 'Copy S3 URI' button in the upper right corner of the S3 bucket screen.
+3. Create an IAM policy to allow you to upload, download and access an S3 bucket.  After you press the 'create policy' button select the JSON tab on your upper right.  You'll want to use the JSON below as your template.  Only alter the Resource section.  You can see that I have 6 entries which are for 3 S3 buckets.  Remove my entries and create yours as follows: For each S3 URI, which you copied earlier, create 2 entries; one that ends with a __/*__ and one that doesn't.  Make sure each entry starts with __arn:aws:__  And don't forget a comma at the end of each entry except for the last one.  Then click the 'Next' button in the lower right, enter your policy name, and create your policy.
 
 ```
 {
@@ -117,8 +117,35 @@ Here is a picture of my VPC preview screen:
 
 ![AWS VPC Sample Configuration](https://github.com/adamblondon01/dbworkload-demo/blob/859a7920f5c60df1a7c78d82dde2cf79217c4548/sample%20AWS%20VPC%20configuration.png)
 
-3. Create your internal and external security groups.  Go to the 'Security Groups' screen and make sure you have selected the AWS region that you want these security groups created in, and correspondingly, your database cluster. (Look in the upper right corner for the region dropdown list.)  Then create the external security group.  Make sure you have inbound entries for ports 22, 8080 and 26257 for your home IP address and the Netskope IP addresses.  (See [Netskope IP Addresses](https://cockroachlabs.atlassian.net/wiki/spaces/HELP/pages/3735027747/Netskope+IP+Ranges) )  For your outbound entries, you can enable everything.
+2. Create your internal and external security groups.  Go to the 'Security Groups' screen and make sure you have selected the AWS region that you want these security groups created in, and correspondingly, your VPC and database cluster. (Look in the upper right corner for the region dropdown list.)
 
+Create the external security group.  Make sure you have inbound entries for ports 22, 8080 and 26257 for your home IP address and the Netskope IP addresses.  (See [Netskope IP Addresses](https://cockroachlabs.atlassian.net/wiki/spaces/HELP/pages/3735027747/Netskope+IP+Ranges) )  Make sure each IP address has a '/32' at the end of each one so that only that specific IP address can have access.  For your outbound entries, you can enable all ports to access all IP addresses. ( IP address 0.0.0.0/0 )
+
+Create your internal security group.  You'll need inbound entries for ports 22, 8080 and 26257.  For the IP address use your VPC block fo 10.0.0.0/16 to allow inbound connections only from addresses inside your VPC (i.e. allow only database cluster nodes and the app server node to talk with each other.)  For your outbound entries you can enable everything.
+
+You will also need to create an additional external security group for your remote application server.  Pick a region on the other side of the country from your database cluster, like in my case us-west-2 since I created my database cluster in us-east-2.  For your inbound entries, you just need an entry for port 22 for your home IP address and the Netskope IP addresses.  For your outbound entries, you can enable all ports to access all IP addresses.
+
+3. Create your EC2 instances.  I won't cover everything; just the key points.  Start with the app server that lives in the same region as the database cluster.
+   A. Make sure you are in the same region as your VPC and security groups.
+   B. Press the 'Launch Instances' button.
+   C. I suggest you use the AWS Linux 2023 AMI, which is the default.
+   D. For your instance type I would suggest a m6a.xlarge or a m6a.2xlarge depending on what you're going to be running on the app server.
+   E. Choose the key pair for this region that you created earlier.
+   F. Edit your network settings and choose the VPC you already created and 1 of the three public subnets you created.  (It doesn't matter which one just that it is public.)
+   G. Enable the 'Auto-assign public' ip address setting
+   H. Choose the 'Select existing security group' radio button and choose the external security group you created earlier.
+   I. Under 'Configure storage' 100GB of gp3 storage should be a good size.
+   J. Launch the instance.
+
+For the 3 database cluster nodes repeat step 3 except as follows:
+   A. I suggest an instance type of m6a.2xlarge
+   B. Each node should be on a different private subnet zone (so one node on private zone a, one node on private zone b, and one node on private zone c)
+   C. Disable the 'Auto-assign public' ip address setting
+   D. For the security group choose the internal security group you created earlier
+
+
+copy the key-pairs to your app server nodes; for your region and the region for the remote app server
+create your certs and copy them to the app servers and the cluster nodes
 
 
 
