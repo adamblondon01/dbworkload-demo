@@ -106,12 +106,13 @@ Now go back to the list of IAM users and click on your new user which is highlig
 ## Single Region Setup
 
 1. Create your Virtual Private Cloud.  Go to the VPC screen and make sure you have selected the AWS region that you want the VPC created in which is also where your database cluster will be located in.  Select the 'create VPC' button in the upper right.  Then do as follows:
-   A. Select the' VPC and more' radio button.
-   B. Under the name tag, clear the default entry of 'Project' and put in the name you want for your VPC and its related objects.  I used 'adam-london'.
-   C. Record your CIDR block for later use.  You can leave the default of 10.0.0.0/16
-   D. Change your 'Number of Availability Zones' to 3 and it will automatically update the number of private and public subnets.
-   E. Take a screen snapshot of the 'Preview screen' on your right.  You'll need the names of your VPC and public and private subnets for later use.
-   F. Create your VPC.
+
+   1. Select the' VPC and more' radio button.
+   2. Under the name tag, clear the default entry of 'Project' and put in the name you want for your VPC and its related objects.  I used 'adam-london'.
+   3. Record your CIDR block for later use.  You can leave the default of 10.0.0.0/16
+   4. Change your 'Number of Availability Zones' to 3 and it will automatically update the number of private and public subnets.
+   5. Take a screen snapshot of the 'Preview screen' on your right.  You'll need the names of your VPC and public and private subnets for later use.
+   6. Create your VPC.
 
 Here is a picture of my VPC preview screen:
 
@@ -126,23 +127,26 @@ Create your internal security group.  You'll need inbound entries for ports 22, 
 You will also need to create an additional external security group for your remote application server.  Pick a region on the other side of the country from your database cluster, like in my case us-west-2 since I created my database cluster in us-east-2.  For your inbound entries, you just need an entry for port 22 for your home IP address and the Netskope IP addresses.  For your outbound entries, you can enable all ports to access all IP addresses.
 
 3. Create your EC2 instances.  I won't cover everything; just the key points.  Start with the app server that lives in the same region as the database cluster.
-   A. Make sure you are in the same region as your VPC and security groups.
-   B. Press the 'Launch Instances' button.
-   C. I suggest you use the AWS Linux 2023 AMI, which is the default.
-   D. For your instance type I would suggest a m6a.xlarge or a m6a.2xlarge depending on what you're going to be running on the app server.
-   E. Choose the key pair for this region that you created earlier.
-   F. Edit your network settings and choose the VPC you already created and 1 of the three public subnets you created.  (It doesn't matter which one just that it is public.)
-   G. Enable the 'Auto-assign public' ip address setting
-   H. Choose the 'Select existing security group' radio button and choose the external security group you created earlier.
-   I. Under 'Configure storage' 100GB of gp3 storage should be a good size.
-   J. Launch the instance.
+   1. Make sure you are in the same region as your VPC.
+   2. Press the 'Launch Instances' button.
+   3. I suggest you use the AWS Linux 2023 AMI, which is the default.
+   4. For your instance type I would suggest a m6a.xlarge or a m6a.2xlarge depending on what you're going to be running on the app server.
+   5. Choose the key pair for this region that you created earlier.
+   6. Edit your network settings and choose the VPC you already created and 1 of the three public subnets you created.  (It doesn't matter which one just that it is public.)
+   7. Enable the 'Auto-assign public' ip address setting
+   8. Choose the 'Select existing security group' radio button and choose the external security group you created earlier.
+   9. Under 'Configure storage' 100GB of gp3 storage should be a good size.
+   10. Launch the instance.
 
-For the 3 database cluster nodes repeat step 3 except as follows:
-   A. I suggest an instance type of m6a.2xlarge
-   B. Each node should be on a different private subnet zone (so one node on private zone a, one node on private zone b, and one node on private zone c)
-   C. Disable the 'Auto-assign public' ip address setting
-   D. For the security group choose the internal security group you created earlier
+4. For the 3 database cluster nodes repeat step 3 except as follows:
+   1. I suggest an instance type of m6a.2xlarge
+   2. Each node should be on a different private subnet zone (so one node on private zone a, one node on private zone b, and one node on private zone c)
+   3. Disable the 'Auto-assign public' ip address setting
+   4. For the security group choose the internal security group you created earlier
 
+5. For the remote app server node:
+   1. Choose the region where you created the remote external security group.
+   2. 
 
 copy the key-pairs to your app server nodes; for your region and the region for the remote app server
 create your certs and copy them to the app servers and the cluster nodes
