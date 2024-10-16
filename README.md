@@ -115,7 +115,7 @@ Now go back to the list of IAM users and click on your new user which is highlig
 
 Here is a picture of my VPC preview screen:
 
-![AWS VPC Sample Comfiguration](sample\ AWS\ VPC\ configuration.png)
+![AWS VPC Sample Configuration](https://github.com/adamblondon01/dbworkload-demo/blob/859a7920f5c60df1a7c78d82dde2cf79217c4548/sample%20AWS%20VPC%20configuration.png)
 
 3. Create your internal and external security groups.  Go to the 'Security Groups' screen and make sure you have selected the AWS region that you want these security groups created in, and correspondingly, your database cluster. (Look in the upper right corner for the region dropdown list.)  Then create the external security group.  Make sure you have inbound entries for ports 22, 8080 and 26257 for your home IP address and the Netskope IP addresses.  (See [Netskope IP Addresses](https://cockroachlabs.atlassian.net/wiki/spaces/HELP/pages/3735027747/Netskope+IP+Ranges) )  For your outbound entries, you can enable everything.
 
