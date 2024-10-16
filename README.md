@@ -22,7 +22,7 @@ Also for the single region demo we will manually create the AWS environment to g
 |loyalty_test.yaml  |yaml file to create test loyalty data file for 5 rows   |
 |loyalty.yaml  |yaml file to create loyalty data files for 30 million rows  |
 |customers_test.csv  |5 rows of customers data to test import command |
-|loyalty_test.csv  |5 rows of loyalty daa to test import command |
+|loyalty_test.csv  |5 rows of loyalty data to test import command |
 |load_customers_test.sql  |SQL command to import customers test data |
 |load_loyalty_test.sql  |SQL command to import loyalty test data |
 |load_loyalty_aws.sql  |SQL commands to import all 30 million rows of loyalty data |
