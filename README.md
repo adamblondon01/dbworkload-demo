@@ -126,7 +126,7 @@ Create your internal security group.  You'll need inbound entries for ports 22, 
 
 You will also need to create an additional external security group for your remote application server.  Pick a region on the other side of the country from your database cluster, like in my case us-west-2 since I created my database cluster in us-east-2.  For your inbound entries, you just need an entry for port 22 for your home IP address and the Netskope IP addresses.  For your outbound entries, you can enable all ports to access all IP addresses.
 
-3. Create your EC2 instances.  I won't cover everything; just the key points.  Start with the app server that lives in the same region as the database cluster.
+3. Create your EC2 instances.  I won't cover everything; just the key points.  Start with the app server that you want in the same region as the database cluster.
    1. Make sure you are in the same region as your VPC.
    2. Press the 'Launch Instances' button.
    3. I suggest you use the AWS Linux 2023 AMI, which is the default.
@@ -146,7 +146,8 @@ You will also need to create an additional external security group for your remo
 
 5. For the remote app server node:
    1. Choose the region where you created the remote external security group.
-   2. 
+   2. Follow the steps in #3 except choose the roachpod vpc and one of the roachpod's public subnets.  There's no reason to create a new VPC unless you want to. :-)
+
 
 copy the key-pairs to your app server nodes; for your region and the region for the remote app server
 create your certs and copy them to the app servers and the cluster nodes
