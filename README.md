@@ -62,6 +62,11 @@ My region choices were to use us-east-1 (North Virginia), us-east-2 (Ohio) and u
 
 # Setup
 
+Before you start I highly suggest you read Fabio's write up on using dbworkload at:
+
+   [dbworkload Details](https://fabiog1901.github.io/dbworkload/)
+
+
 ## General Setup
 
 1. Create key pairs for each region you are using for your single region and mult-region clusters.  Create 1 key pair for each of the 3 regions you’ll be using.  I would suggest us-east-1 (North Virginia), us-east-2 (Ohio) and us-west-2 (Oregon) .  Use the default of RSA and .pem if you are using a Mac and download each .pem file to your Mac for later use.
@@ -188,19 +193,37 @@ Here is a picture of my VPC preview screen:
 
 2. Copy all the files listed above except for haproxy.cfg to the app server in the database cluster region.  Copy the ulta_beauty.py and the run_dbworkload.sh files to the app server in the remote region.
 
+__Run the remaining setup steps on the app server in the database cluster region:__
+
 3. Build the tables and the test tables by running the database_build_script.sql and the build_test_tables.sql
 
-4. Test the importing of customer and loyalty data by running the load_customers_test_aws.sql script and the load_loyalty_test_aws.sql script.  The data should be loaded into the customers_test and loyalty_test tables.  If you want to confirm the original data, please see the customers_test.csv and loyalty_test.csv files.  If you wish you can also rebuild the 2 csv files by running dbworkload util with the customers_test.yaml and loyalty_test.yaml as follows:
+4. Test the importing of customer and loyalty data by running the load_customers_test_aws.sql script and the load_loyalty_test_aws.sql script.  I have already placed the data files you'll need in a pair of S3 buckets.  First edit each file and enter in your access key and secret access key, which you created in step 3 of the general setup, and the S3 bucket's AWS region name, us-east-2, where I already loaded the data.  When run, the data will be loaded into the customers_test and loyalty_test tables, which you can check.  This will confirm that you correctly setup your S3 connectivity.  If you want to confirm against the original data, please see the customers_test.csv and loyalty_test.csv files, which I've also added to the list of files attached to this repository.  If you have any issues you may want to configure the aws cli and run the following command which will show you a list of all the S3 buckets and let you know if you have connectivity from the app server node to S3.
+
+   ```
+   aws s3 ls
+   ```
+
+   If you wish you can also build your own version of the 2 csv files by running dbworkload util with the customers_test.yaml and loyalty_test.yaml as follows:
 
    ```
    dbworkload util csv -i customers_test.yaml -x 1 -d ','
    dbworkload util csv -i loyalty_test.yaml -x 1 -d ','
    ```
 
-Ignore the output from dbworkload since it isn't relevant for this demo.  dbworkload will have created 2 sub-directories, customer_test and loyalty_test, with the data for each run in each sub-directory.
+   Ignore the output from dbworkload since it isn't relevant for this demo.  dbworkload will create 2 sub-directories, customer_test and loyalty_test, with the data for each run in each sub-directory.  You'll need to place these 2 data files in the S3 bucket you created in the general setup step #2 by using the 'aws s3 cp' command, alter the 2 SQL scripts to reflect your new S3 bucket name (and possibly region) and then run the SQL scripts.
 
-To understand all the dbworkload util csv parameters, run:
+   To understand all the dbworkload util csv parameters, run:
 
    ```
    dbworkload util csv --help
    ```
+
+5. Import the data into your tables.  I have already copied the data into a pair of S3 buckets in region us-east-2 .  Edit the 2 import files, load_customers_aws.sql and load_loyalty_aws.sql, and put in your access key and secret access key and the region us-east-2 on all 300 lines in each file.  (There are 300 import files for each table; each with 100,000 rows of data.)  Run both scripts; be aware it will take a while.
+
+   If you wish to regenerate the data for yourself, see the included customers.yaml and loyalty.yaml files, and see step 4 above.
+
+6. Run the add_customers_keys_to_loyalty_table.sql .  It will take awhile.  This will setup the referential integrity between the 2 tables.
+
+# Running your tests
+
+To run your tests, run the run_dbworkload.sh.
