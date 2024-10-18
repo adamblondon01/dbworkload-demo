@@ -64,8 +64,10 @@ My region choices were to use us-east-1 (North Virginia), us-east-2 (Ohio) and u
 
 ## General Setup
 
-1. Create key pairs for each region you are using for your single region and mult-region clusters.  So you want to setup 1 key pair for each of the 3 regions you’ll be using.  I would suggest us-east-1 (North Virginia), us-east-2 (Ohio) and us-west-2 (Oregon)
+1. Create key pairs for each region you are using for your single region and mult-region clusters.  Create 1 key pair for each of the 3 regions you’ll be using.  I would suggest us-east-1 (North Virginia), us-east-2 (Ohio) and us-west-2 (Oregon) .  Use the default of RSA and .pem if you are using a Mac and download each .pem file to your Mac for later use.
+
 2. Create a non-public S3 bucket where you will put your table data files that you generate with dbworkload.  You’ll later import these data files into your tables using the SQL IMPORT INTO command.  I suggest you create the S3 bucket in the same region as the single region database cluster.  Note down which region your choose for later usage.  (Note: Fabio’s dbworkload github mentions doing this by using a web server on your application node.  With the latest versions of CRDB (I used version 24.2.2) this no longer will work if you have a large number of data files to import.)  Copy your bucket's URI; select the 'Copy S3 URI' button in the upper right corner of the S3 bucket screen.
+
 3. Create an IAM policy to allow you to upload, download and access an S3 bucket.  After you press the 'create policy' button select the JSON tab on your upper right.  You'll want to use the JSON below as your template.  Only alter the Resource section.  You can see that I have 6 entries which are for 3 S3 buckets.  Remove my entries and create yours as follows: For each S3 URI, which you copied earlier, create 2 entries; one that ends with a __/*__ and one that doesn't.  Make sure each entry starts with __arn:aws:__  And don't forget a comma at the end of each entry except for the last one.  Then click the 'Next' button in the lower right, enter your policy name, and create your policy.
 
 ```
@@ -120,11 +122,11 @@ Here is a picture of my VPC preview screen:
 
 2. Create your internal and external security groups.  Go to the 'Security Groups' screen and make sure you have selected the AWS region that you want these security groups created in, and correspondingly, your VPC and database cluster. (Look in the upper right corner for the region dropdown list.)
 
-Create the external security group.  Make sure you have inbound entries for ports 22, 8080 and 26257 for your home IP address and the Netskope IP addresses.  (See [Netskope IP Addresses](https://cockroachlabs.atlassian.net/wiki/spaces/HELP/pages/3735027747/Netskope+IP+Ranges) )  Make sure each IP address has a '/32' at the end of each one so that only that specific IP address can have access.  For your outbound entries, you can enable all ports to access all IP addresses. ( IP address 0.0.0.0/0 )
+   1. Create the external security group.  This will be used by your app server node that is in the same region as the database cluster, and only your two app server nodes will have access to the internet.  Make sure you have inbound entries for ports 22, 8080 and 26257 for your home IP address and the Netskope IP addresses.  (See [Netskope IP Addresses](https://cockroachlabs.atlassian.net/wiki/spaces/HELP/pages/3735027747/Netskope+IP+Ranges) )  Make sure each IP address has a '/32' at the end of each one so that only that specific IP address can have access.  For your outbound entries, you can enable all ports to access all IP addresses. ( IP address 0.0.0.0/0 )
 
-Create your internal security group.  You'll need inbound entries for ports 22, 8080 and 26257.  For the IP address use your VPC block fo 10.0.0.0/16 to allow inbound connections only from addresses inside your VPC (i.e. allow only database cluster nodes and the app server node to talk with each other.)  For your outbound entries you can enable everything.
+   2. Create your internal security group.  This will be used by your database cluster nodes and they will not have access to the internet.  You'll need inbound entries for ports 22, 8080 and 26257.  For the IP address use your VPC block fo 10.0.0.0/16 to allow inbound connections only from addresses inside your VPC (i.e. allow only database cluster nodes and the app server node to talk with each other.)  For your outbound entries you can enable everything.
 
-You will also need to create an additional external security group for your remote application server.  Pick a region on the other side of the country from your database cluster, like in my case us-west-2 since I created my database cluster in us-east-2.  For your inbound entries, you just need an entry for port 22 for your home IP address and the Netskope IP addresses.  For your outbound entries, you can enable all ports to access all IP addresses.
+   3. Create an additional external security group for your remote application server.  This node will also have access to the internet.  Pick a region on the other side of the country from your database cluster.  In my case I used us-west-1 since I created my database cluster in us-east-2.  For your inbound entries, you just need an entry for port 22 for your home IP address and the Netskope IP addresses.  For your outbound entries, you can enable all ports to access all IP addresses.
 
 3. Create your EC2 instances.  I won't cover everything; just the key points.  Start with the app server that you want in the same region as the database cluster.
    1. Make sure you are in the same region as your VPC.
@@ -148,15 +150,40 @@ You will also need to create an additional external security group for your remo
    1. Choose the region where you created the remote external security group.
    2. Follow the steps in #3 except choose the roachpod vpc and one of the roachpod's public subnets.  There's no reason to create a new VPC unless you want to. :-)
 
+6. Copy the .pem file for your database cluster region to the app server in the region.  Since you can access this node from the internet, you'll use this node to connect to the database nodes to setup them up.
 
-copy the key-pairs to your app server nodes; for your region and the region for the remote app server
-create your certs and copy them to the app servers and the cluster nodes
+7. Download CockroachDB
 
+   1. Download the CockroachDB full executable to each of the database nodes.  (Intel version if you're using m6a EC2 instances - if you're not sure run the uname -p Linux command)
+  
+      I suggest you use curl on your app server node or your Mac's browser and then push the files to each of the database nodes using sftp or scp.  If you're on your Mac, you'll need to push the file first to the app server node and then log onto the app server node and push it to each of the database nodes.
 
+   [Link to Cockroach Downloads](https://www.cockroachlabs.com/docs/releases/v24.2)
 
+   2. Download the CocckroachDB SQL only executable and push it to each of the app server nodes.
 
-readme examples:
+8. Configure the database and app server nodes
 
-[test link](https://cockroachlabs.com)
+9. Setup your database and client certificates.  (You'll need client certs for both app server nodes.)  Don't forget to include your app servers private IP addresses.  I suggest you do the certs creation on the app server that is in the database cluster region.  See:
 
-![a sql file](build_2_tables_only.sql)
+   [how to create your certificates](https://www.cockroachlabs.com/docs/stable/manage-certs-cli)
+   
+   [Certification creation on AWS](https://www.cockroachlabs.com/docs/stable/deploy-cockroachdb-on-aws#step-5-generate-certificates)
+
+11. Start your database.  I suggest you write a bash script to do this on the app server in your database region.
+
+12. Setup and start HAProxy on both app server nodes.  You can use the cockroach gen command to help.
+
+    [Cockroach gen reference](https://www.cockroachlabs.com/docs/v24.2/cockroach-gen.html)
+
+    For an example of a working HAProxy server configuration file see (Note the use of the private IP addresses):
+
+    ![Example HAProxy Configuration File](https://github.com/adamblondon01/dbworkload-demo/blob/176cfcebacf634d538d53e3fe3ad9063fe08e9b6/haproxy.cfg)
+
+### Application setup
+
+1. Install dbworkload on your app servers.  See Fabio's Github for details:
+
+   [dbworkload Details](https://fabiog1901.github.io/dbworkload/)
+
+2. 
