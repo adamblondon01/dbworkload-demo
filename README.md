@@ -127,7 +127,7 @@ Here is a picture of my VPC preview screen:
 
 2. Create your internal and external security groups.  Go to the 'Security Groups' screen and make sure you have selected the AWS region that you want these security groups created in, and correspondingly, your VPC and database cluster. (Look in the upper right corner for the region dropdown list.)
 
-   1. Create the external security group.  This will be used by your app server node that is in the same region as the database cluster, and only your two app server nodes will have access to the internet.  Make sure you have inbound entries for ports 22, 8080 and 26257 for your home IP address and the Netskope IP addresses.  (See [Netskope IP Addresses](https://cockroachlabs.atlassian.net/wiki/spaces/HELP/pages/3735027747/Netskope+IP+Ranges) )  Make sure each IP address has a '/32' at the end of each one so that only that specific IP address can have access.  For your outbound entries, you can enable all ports to access all IP addresses. ( IP address 0.0.0.0/0 )
+   1. Create the external security group.  This will be used by your app server node that is in the same region as the database cluster, and only your two app server nodes will have access to the internet.  Make sure you have inbound entries for ports 22, 8080 and 26257 for your home IP address and the Netskope IP addresses.  (See [Netskope IP Addresses](https://cockroachlabs.atlassian.net/wiki/spaces/HELP/pages/3735027747/Netskope+IP+Ranges) )  Make sure each IP address has a '/32' at the end of each one so that only that specific IP address can have access.  Finally you also need to include the public ip address for your remote app server.  This will change every time you start/restart this EC2 instance and you'll need to update this entry in your external security group, so just be aware of this.  For your outbound entries, you can enable all ports to access all IP addresses. ( IP address 0.0.0.0/0 )
 
    2. Create your internal security group.  This will be used by your database cluster nodes and they will not have access to the internet.  You'll need inbound entries for ports 22, 8080 and 26257.  For the IP address use your VPC block fo 10.0.0.0/16 to allow inbound connections only from addresses inside your VPC (i.e. allow only database cluster nodes and the app server node to talk with each other.)  For your outbound entries you can enable everything.
 
@@ -169,21 +169,25 @@ Here is a picture of my VPC preview screen:
 
 8. Configure the database and app server nodes
 
-9. Setup your database and client certificates.  (You'll need client certs for both app server nodes.)  Don't forget to include your app servers private IP addresses.  I suggest you do the certs creation on the app server that is in the database cluster region.  See:
+9. Setup your database and client certificates.  (You'll need client certs for both app server nodes.)  Don't forget to include the private ip addresses for your database nodes, your local app server's private IP address and the remote app server's public ip address if you want to directly connect from an app server to a specific database cluster node.  I suggest you do the certs creation on the app server that is in the database cluster region.
+    
+    For more info see:
 
    [how to create your certificates](https://www.cockroachlabs.com/docs/stable/manage-certs-cli)
    
    [Certification creation on AWS](https://www.cockroachlabs.com/docs/stable/deploy-cockroachdb-on-aws#step-5-generate-certificates)
 
-11. Start your database.  I suggest you write a bash script to do this on the app server in your database region.
+11. Start your database.  I suggest you write a bash script to do this on the app server in your database cluster region.  Test connectivity from the local app server using the cockroach sql command directly to each database node.
 
-12. Setup and start HAProxy on both app server nodes.  You can use the cockroach gen command to help.
+12. Setup and start HAProxy on the app server node in the same region as your database cluster.  You can use the cockroach gen command to help.
 
     [Cockroach gen reference](https://www.cockroachlabs.com/docs/v24.2/cockroach-gen.html)
 
     For an example of a working HAProxy server configuration file see (Note the use of the private IP addresses):
 
     ![Example HAProxy Configuration File](https://github.com/adamblondon01/dbworkload-demo/blob/176cfcebacf634d538d53e3fe3ad9063fe08e9b6/haproxy.cfg)
+
+    Notice in the example that I've used the private IP addresses for each database node and I've setup a configuration for both ports 26257 and 8080 so that you can get SQL and dbconsole access locally and remotely.  All you need to do is use the public or private IP address for the local app server depending on where you are connecting from and either port number.  If you are connecting remotely, like from the remote app server, you'll need to use the public IP address for the local app server.
 
 ### Single Region Application Setup
 
@@ -227,3 +231,4 @@ __Run the remaining setup steps on the app server in the database cluster region
 # Running your single region tests
 
 To run your tests, run the run_dbworkload.sh.
+need to fix up the script and here's how
