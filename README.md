@@ -16,22 +16,22 @@ Also for the single region demo we will manually create the AWS environment to g
 
 |  File|Description  |
 |--|--|
-|haproxy.cfg  |Single region HAProxy config file  |
-|customers_test.yaml  |yaml file to create test customers data file for 5 rows |
-|customers.yaml  |yaml file to create customers data files for 30 million rows  |
-|loyalty_test.yaml  |yaml file to create test loyalty data file for 5 rows   |
-|loyalty.yaml  |yaml file to create loyalty data files for 30 million rows  |
-|customers_test.csv  |5 rows of customers data to test import command |
-|loyalty_test.csv  |5 rows of loyalty data to test import command |
-|load_customers_test_aws.sql  |SQL command to import 5 rows of customers test data to loyalty_test table |
-|load_loyalty_test_aws.sql  |SQL command to import 5 rows of loyalty test data to loyalty_test table |
-|load_loyalty_aws.sql  |SQL commands to import all 30 million rows of loyalty data |
-|load_customers_aws.sql  |SQL commands to import all 30 million rows of customers data |
-|database_build_script.sql  |SQL DDL commands to build database objects |
-|build_test_tables.sql  |SQL DDL commands to built 2 test tables only |
 |add_loyalty_keys_to_customers_table.sql  |SQL to add customers UUID key to loyalty table  |
-|ulta_beauty.py  |Python program to run using dbworkload |
+|build_test_tables.sql  |SQL DDL commands to built 2 test tables only |
+|customers.yaml  |yaml file to create customers data files for 30 million rows  |
+|customers_test.csv  |5 rows of customers data to test import command |
+|customers_test.yaml  |yaml file to create test customers data file for 5 rows |
+|database_build_script.sql  |SQL DDL commands to build database objects |
+|haproxy.cfg  |Single region HAProxy config file  |
+|load_customers_aws.sql  |SQL commands to import all 30 million rows of customers data |
+|load_customers_test_aws.sql  |SQL command to import 5 rows of customers test data to loyalty_test table |
+|load_loyalty_aws.sql  |SQL commands to import all 30 million rows of loyalty data |
+|load_loyalty_test_aws.sql  |SQL command to import 5 rows of loyalty test data to loyalty_test table |
+|loyalty.yaml  |yaml file to create loyalty data files for 30 million rows  |
+|loyalty_test.csv  |5 rows of loyalty data to test import command |
+|loyalty_test.yaml  |yaml file to create test loyalty data file for 5 rows   |
 |run_dbworkload.sh  |Bash script to kickoff dbworkload runs on the app node(s) |
+|ulta_beauty.py  |Python program to run using dbworkload |
 
 # Hardware Configurations
 
@@ -180,10 +180,19 @@ Here is a picture of my VPC preview screen:
 
     ![Example HAProxy Configuration File](https://github.com/adamblondon01/dbworkload-demo/blob/176cfcebacf634d538d53e3fe3ad9063fe08e9b6/haproxy.cfg)
 
-### Application setup
+### Single Region Application Setup
 
 1. Install dbworkload on your app servers.  See Fabio's Github for details:
 
    [dbworkload Details](https://fabiog1901.github.io/dbworkload/)
 
-2. Copy the 
+2. Copy all the files listed above except for haproxy.cfg to the app server in the database cluster region.  Copy the ulta_beauty.py and the run_dbworkload.sh files to the app server in the remote region.
+
+3. Build the tables and the test tables by running the database_build_script.sql and the build_test_tables.sql
+
+4. Test the importing of customer and loyalty data by running the load_customers_test_aws.sql script and the load_loyalty_test_aws.sql script.  The data should be loaded into the customers_test and loyalty_test tables.  If you want to confirm the original data, please see the customers_test.csv and loyalty_test.csv files.  If you wish you can also rebuild the 2 csv files by running dbworkload util with the customers_test.yaml and loyalty_test.yaml as follows:
+
+   ```
+   dbworkload util csv -i customers_test.yaml -x 1 -d ','
+   dbworkload util csv -i loyalty_test.yaml -x 1 -d ','
+   ```
