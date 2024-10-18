@@ -198,3 +198,9 @@ Here is a picture of my VPC preview screen:
    ```
 
 Ignore the output from dbworkload since it isn't relevant for this demo.  dbworkload will have created 2 sub-directories, customer_test and loyalty_test, with the data for each run in each sub-directory.
+
+To understand all the dbworkload util csv parameters, run:
+
+   ```
+   dbworkload util csv --help
+   ```
