@@ -23,12 +23,12 @@ Also for the single region demo we will manually create the AWS environment to g
 |loyalty.yaml  |yaml file to create loyalty data files for 30 million rows  |
 |customers_test.csv  |5 rows of customers data to test import command |
 |loyalty_test.csv  |5 rows of loyalty data to test import command |
-|load_customers_test.sql  |SQL command to import customers test data |
-|load_loyalty_test.sql  |SQL command to import loyalty test data |
+|load_customers_test_aws.sql  |SQL command to import 5 rows of customers test data to loyalty_test table |
+|load_loyalty_test_aws.sql  |SQL command to import 5 rows of loyalty test data to loyalty_test table |
 |load_loyalty_aws.sql  |SQL commands to import all 30 million rows of loyalty data |
 |load_customers_aws.sql  |SQL commands to import all 30 million rows of customers data |
-|databae_build_script.sql  |SQL DDL commands to build database objects |
-|build_2_tables_only.sql  |SQL DDL commands to built 2 tables only |
+|database_build_script.sql  |SQL DDL commands to build database objects |
+|build_test_tables.sql  |SQL DDL commands to built 2 test tables only |
 |add_loyalty_keys_to_customers_table.sql  |SQL to add customers UUID key to loyalty table  |
 |ulta_beauty.py  |Python program to run using dbworkload |
 |run_dbworkload.sh  |Bash script to kickoff dbworkload runs on the app node(s) |
