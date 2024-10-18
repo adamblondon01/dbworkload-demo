@@ -196,3 +196,5 @@ Here is a picture of my VPC preview screen:
    dbworkload util csv -i customers_test.yaml -x 1 -d ','
    dbworkload util csv -i loyalty_test.yaml -x 1 -d ','
    ```
+
+Ignore the output from dbworkload since it isn't relevant for this demo.  dbworkload will have created 2 sub-directories, customer_test and loyalty_test, with the data for each run in each sub-directory.
