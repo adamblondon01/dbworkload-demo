@@ -230,5 +230,8 @@ __Run the remaining setup steps on the app server in the database cluster region
 
 # Running your single region tests
 
-To run your tests, run the run_dbworkload.sh.
-need to fix up the script and here's how
+To run your tests by running the run_dbworkload.sh on local and remote app server nodes.  You'll see performance goes down when you run the script on the remote app server.  First alter the script so that it uses the IP address for the HAProxy node.  For the local app server use the private IP address and for the remote app server use the public IP address.  And make sure the 3 certification parameters point to the directory where you have these 3 files.  You can now run the shell script.  Feel free to change the dbworkload parameters like -c and -d.  Also review Fabio's documentation on these parameters (and more) and you can also get additional information from the following command:
+
+```
+dbworkload run --help
+```
