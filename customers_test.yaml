@@ -1,0 +1,111 @@
+customers_test:
+  - count: 5
+    sort-by:
+      - cust_id
+    columns:
+      cust_id:
+        type: UUIDv4
+        args:
+          seed: 0
+          null_pct: 0
+      secondary_cust_id:
+        type: sequence
+        args:
+          start: 1
+      first_name:
+        type: string
+        args:
+          min: 4
+          max: 20
+          seed: 0
+          null_pct: 0.0
+          array: 0
+      last_name:
+        type: string
+        args:
+          min: 4
+          max: 20
+          seed: 0
+          null_pct: 0.0
+          array: 0
+      street_address:
+        type: string
+        args:
+          min: 5
+          max: 30
+          seed: 0
+          null_pct: 0.0
+          array: 0
+      city:
+        type: string
+        args:
+          min: 2
+          max: 20
+          seed: 0
+          null_pct: 0.0
+          array: 0
+      state:
+        type: choice
+        args:
+          population:
+            - CA
+            - IL
+            - CO
+            - AZ
+            - MN
+            - NY
+            - MI
+            - WA
+            - ID
+            - MN
+            - SD
+            - IN
+            - MO
+            - MI
+            - FL
+          weights: 
+            - 1
+            - 1
+            - 1
+            - 1
+            - 1
+            - 1
+            - 1
+            - 1
+            - 1 
+            - 1
+            - 1
+            - 1
+            - 1
+            - 1
+            - 1 
+          cum_weights: 
+            # None
+          seed: 0
+          null_pct: 0.0
+          array: 0
+      zip:
+        type: integer
+        args:
+          min: 10000
+          max: 99999
+          seed: 0
+          null_pct: 0.0
+          array: 0
+      phone:
+        type: integer
+        args:
+          min: 1000000000
+          max: 9999999999
+          seed: 0
+          null_pct: 0.0
+          array: 0
+      birthdate:
+        type: Date
+        args:
+          start: "1920-01-01"
+          end: "2003-01-01"
+          format: '%Y-%m-%d'
+          seed: 0
+          null_pct: 0.0
+          array: 0

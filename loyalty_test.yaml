@@ -1,0 +1,85 @@
+loyalty_test:
+  - count: 5
+    sort-by:
+      - loyalty_id
+    columns:
+      loyalty_id:
+        type: UUIDv4
+        args:
+          seed: 0
+          null_pct: 0
+      cust_id:
+        type: UUIDv4
+        args:
+          seed: 0
+          null_pct: 100
+      secondary_cust_id:
+        type: sequence
+        args: 
+          start: 1
+      start_date:
+        type: Date
+        args:
+          start: "2000-01-01"
+          end: "2024-07-31"
+          format: '%Y-%m-%d'
+          seed: 0
+          null_pct: 0.0
+          array: 0
+      total_points:
+        type: constant
+        args:
+          value: 0
+      total_points_this_year:
+        type: integer
+        args:
+          min: 0
+          max: 999
+          seed: 0
+          null_pct: 0.0
+          array: 0
+      total_transactions:
+        type: integer
+        args:
+          min: 0
+          max: 1000
+          seed: 0
+          null_pct: 0.0
+          array: 0
+      total_transactions_this_year:
+        type: integer
+        args:
+          min: 0
+          max: 100
+          seed: 0
+          null_pct: 0.0
+          array: 0
+      last_purchase_date:
+        type: Date
+        args:
+          start: "2000-01-01"
+          end: "2024-07-31"
+          format: '%Y-%m-%d'
+          seed: 0
+          null_pct: 0.0
+          array: 0
+      loyalty_level:
+        type: choice
+        args:
+          population:
+            - none
+            - bronze
+            - silver
+            - gold
+            - platinum
+          weights: 
+            - 1
+            - 1
+            - 1
+            - 1
+            - 1 
+          cum_weights: 
+            # None
+          seed: 0
+          null_pct: 0.0
+          array: 0
