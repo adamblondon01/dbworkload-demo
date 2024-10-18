@@ -186,4 +186,4 @@ Here is a picture of my VPC preview screen:
 
    [dbworkload Details](https://fabiog1901.github.io/dbworkload/)
 
-2. 
+2. Copy the 
