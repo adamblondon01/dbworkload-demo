@@ -224,6 +224,6 @@ __Run the remaining setup steps on the app server in the database cluster region
 
 6. Run the add_customers_keys_to_loyalty_table.sql .  It will take awhile.  This will setup the referential integrity between the 2 tables.
 
-# Running your tests
+# Running your single region tests
 
 To run your tests, run the run_dbworkload.sh.
