@@ -222,7 +222,7 @@ __Run the remaining setup steps on the app server in the database cluster region
 
    If you wish to regenerate the data for yourself, see the included customers.yaml and loyalty.yaml files, and see step 4 above.
 
-6. Run the add_customers_keys_to_loyalty_table.sql .  It will take awhile.  This will setup the referential integrity between the 2 tables.
+6. Run the add_customers_keys_to_loyalty_table.sql .  It will take awhile.  This will setup the referential integrity between the 2 tables, customers and loyalty.
 
 # Running your single region tests
 
